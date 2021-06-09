@@ -1,0 +1,88 @@
+#Title{
+  text-align: center;
+
+}
+
+.b1{
+  margin: 0;
+  font-family: arial, sans-serif;
+  background-color: white;
+  background-image: linear-gradient(to right, white, grey);
+}
+
+.b2{
+  margin: 0;
+  display: block; 
+  font-family: arial, sans-serif;
+  background-color: white;
+  float: center;
+}
+
+.topNav{
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  padding-bottom: 1cm;  
+  overflow: hidden;
+  background-color: rgb(38, 81, 102);
+  position: fixed;
+  top: 0;
+  width: 12%;  
+  height: 100%;
+  box-shadow: 5px 5px 8px grey;
+}
+
+
+.navButton {
+  display: block;
+  border-bottom: 0.6px solid rgb(30,30,30);
+  float: center;
+  color: white;
+  padding: 20px 20px;
+  text-align: center;
+  text-decoration: none;
+  transition: 0.5s;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.navButton:hover{
+  background-color: rgb(34, 63, 77);
+}
+
+#Code{
+  border-bottom: none;
+  color: black;
+}
+
+
+
+#logo1{
+  display: block;
+  float: left;
+  width: 2cm;
+  height: 2cm;
+  top: 0;   
+}
+
+.centerbox{
+  background-color: white;
+  width: 11cm;
+  margin-left: 50%;
+  transform: translate(-50%, 0);
+  border-radius: 15px; 
+  text-align: center;
+  padding-bottom: 0.5cm;
+  padding-top: 0.25cm;
+  list-style-type: none;
+}
+
+#Description > dd {
+  margin: 0% auto;
+}
+
+#Code > dd {
+  margin: 0% auto;
+}
+
+

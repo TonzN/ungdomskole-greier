@@ -1,0 +1,7 @@
+.textBox{
+		text-align: center;
+		float: center;
+		width: 70%;
+		margin-left: 50%;
+		transform: translate(-50%, 0);
+	}
