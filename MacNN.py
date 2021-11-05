@@ -103,10 +103,9 @@ def Relu(x):
     return np.maximum(0, x)
 
 def dReLu(x):
-    if x > 0:
-        return 1
-    else:
-        return 0
+    x[x<=0] = 0
+    x[x>0] = 1
+    return x
 
 #Training
 def Cost(prediction, y): 
@@ -140,15 +139,20 @@ class NeuralNetwork: #Object class
     def Create(self, Architecture):
         self.Weights = {}
         self.Biases = {}
+        self.firstCost = False
         self.Arch = Architecture
         self.Layers = [Architecture[i][1] for i in range(1,len(Architecture))]
         
         for l in range(len(Architecture)-1):
-            self.Weights["rIndex"+str(l)] = np.random.rand(Architecture[l+1][0], Architecture[l][0]) 
+            self.Weights["rIndex"+str(l)] = np.random.rand(Architecture[l][0], Architecture[l+1][0]) 
             self.Biases["rIndex"+str(l)] = np.zeros(Architecture[l][0]) 
 
     def Activate(self, Layer, aI):
-        return AF[str(self.Layers[Layer])](np.dot(self.Weights["rIndex"+str(Layer)], aI) + self.Biases["rIndex"+str(Layer)])
+        Bias = self.Biases["rIndex"+str(Layer)]
+        Sum = np.dot(self.Weights["rIndex"+str(Layer)], aI)
+        Layer = str(self.Layers[Layer])
+      
+        return AF[Layer](np.add(Sum, Bias)), np.add(Sum, Bias)
 
     def Forward_prop(self, inp):
         ActivatedInput = inp #aI
@@ -156,9 +160,10 @@ class NeuralNetwork: #Object class
         
         for i in range(len(self.Layers)):
             prevAI = ActivatedInput
-            ActivatedInput = self.Activate(i, prevAI)
+            ActivatedInput, z = self.Activate(i, prevAI)
             self.Log["pAI"+str(i)] = prevAI # Previous Activated Input
             self.Log["AI"+str(i)] = ActivatedInput
+            self.Log["z"+str(i)] = z
         
         return ActivatedInput
 
@@ -175,27 +180,31 @@ class NeuralNetwork: #Object class
         
         deltaCost = dCost(predict, actuall)
         self.UpateLog = {}
-        prevCost = np.matrix(deltaCost)
+        prevCost = np.array(deltaCost)
         
+        if not self.firstCost:
+          self.firstCost = [predict,"Predict", Cost(predict, actuall)]
+        
+        delta  = prevCost[0]
+          
         for layerIndex in reversed(range(len(self.Layers))):         
-            
-            
-            
-            for rowIndex, row in enumerate(self.Weights["rIndex"+str(layerIndex)]): #row = all weight connections between 2 nodes
-                z = self.Log["AI"+str(layerIndex)]
-                prevActivation = self.Log["pAI"+str(layerIndex)]
-                 
-                for weightIndex, weight in enumerate(row):
-                    self.UpateLog["w"+str(layerIndex)+str(rowIndex)+str(weightIndex)] = prevCost[rowIndex] * dAF[self.Layers[layerIndex]](z[weightIndex]) * prevActivation[weightIndex]
-                    self.UpateLog["b"+str(layerIndex)+str(rowIndex)] = prevCost[rowIndex] * dAF[self.Layers[layerIndex]](z[weightIndex])
 
-        for layerIndex in reversed(range(len(self.Layers)-1)):   
+            for rowIndex, row in enumerate(self.Weights["rIndex"+str(layerIndex)]): #row = all weight connections between 2 nodes
+                activation = self.Log["AI"+str(layerIndex)]
+                z = self.Log["z"+str(layerIndex)]
+                prevActivation = self.Log["pAI"+str(layerIndex)]
+                self.UpateLog["w"+str(layerIndex)+str(rowIndex)] = np.multiply(delta, dAF[self.Layers[layerIndex]](z)) * prevActivation
+                self.UpateLog["b"+str(layerIndex)+str(rowIndex)] = np.multiply(delta, dAF[self.Layers[layerIndex]](z))
+                 
+                delta = np.multiply(delta, dAF[self.Layers[layerIndex]](z)) * row
+                
+        for layerIndex in reversed(range(len(self.Layers))):
             for rowIndex, row in enumerate(self.Weights["rIndex"+str(layerIndex)]):
-                for weightIndex, weight in enumerate(row):
-                    self.Weights["rIndex"+str(layerIndex)][rowIndex][weightIndex] -= (learningRate * self.UpateLog["w"+str(layerIndex)+str(rowIndex)+str(weightIndex)])
-                    self.Biases["rIndex"+str(layerIndex)][rowIndex] -= (learningRate * self.UpateLog["b"+str(layerIndex)+str(rowIndex)])
+                self.Weights["rIndex"+str(layerIndex)][rowIndex] = np.subtract(self.Weights["rIndex"+str(layerIndex)][rowIndex], (learningRate * self.UpateLog["w"+str(layerIndex)+str(rowIndex)]))
+                self.Biases["rIndex"+str(layerIndex)][rowIndex] = np.subtract(self.Biases["rIndex"+str(layerIndex)][rowIndex], (learningRate * self.UpateLog["b"+str(layerIndex)+str(rowIndex)]))
         
-        print(prevCost)
+        print("predcost", prevCost)
         layer = self.Weights["rIndex"+str(layerIndex)]
         prevCost = np.dot(np.transpose(layer), prevCost)
+       
        
